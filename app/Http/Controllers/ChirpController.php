@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreChirpRequest;
 use App\Models\Chirp;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -36,11 +37,9 @@ class ChirpController extends Controller
    * @param  \Illuminate\Http\Request  $request
    * @return \Illuminate\Http\Response
    */
-  public function store(Request $request)
+  public function store(StoreChirpRequest $request)
   {
-    $validated = $request->validate([
-      'message' => 'required|string|max:255',
-    ]);
+    $validated = $request->validated();
 
     $request->user()->chirps()->create($validated);
 
@@ -65,7 +64,11 @@ class ChirpController extends Controller
    */
   public function edit(Chirp $chirp)
   {
-    //
+    $this->authorize('update', $chirp);
+
+    return view('chirps.edit', [
+      'chirp' => $chirp,
+    ]);
   }
 
   /**
@@ -75,9 +78,15 @@ class ChirpController extends Controller
    * @param  \App\Models\Chirp  $chirp
    * @return \Illuminate\Http\Response
    */
-  public function update(Request $request, Chirp $chirp)
+  public function update(StoreChirpRequest $request, Chirp $chirp)
   {
-    //
+    $this->authorize('update', $chirp);
+
+    $validated = $request->validated();
+
+    $chirp->update($validated);
+
+    return redirect(route('chirps.index'));
   }
 
   /**
